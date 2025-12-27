@@ -55,6 +55,54 @@ graph TD
     style WebApi_Layer fill:#fdd,stroke:#333,stroke-width:2px
 ```
 
+## Request Flow (POST /api/Transaction)
+
+This project uses **MediatR** to decouple the Controllers from the business logic. Instead of calling a service directly, the Controller sends a "Command" or "Query" into a pipeline.
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant TC as TransactionController
+    participant Med as MediatR (Pipeline)
+    participant Val as CreateTransactionCommandValidator
+    participant Handler as CreateTransactionCommandHandler
+    participant Domain as Transaction (Domain Entity)
+    participant DB as IApplicationDbContext (Infrastructure)
+    participant SQL as Database (PostgreSQL/SQL Server)
+
+    User->>TC: POST /api/transaction { Name, Amount, CatId }
+    
+    TC->>Med: Send(CreateTransactionCommand)
+    
+    Note over Med,Val: MediatR Pipeline Starts
+    
+    Med->>Val: Validate(Command)
+    alt is Invalid
+        Val-->>TC: Validation Errors
+        TC-->>User: 400 Bad Request
+    else is Valid
+        Val-->>Med: OK
+        
+        Med->>Handler: Handle(Command)
+        
+        Note over Handler,Domain: Domain Logic
+        Handler->>Domain: Transaction.Create(name, amount, catId)
+        Domain-->>Handler: New Transaction Object
+        
+        Note over Handler,DB: Persistence
+        Handler->>DB: Add(transaction)
+        Handler->>DB: SaveChangesAsync()
+        DB->>SQL: INSERT INTO Transactions...
+        SQL-->>DB: Success (Return ID)
+        DB-->>Handler: OK (transaction.Id)
+        
+        Handler-->>Med: Return transaction.Id
+        Med-->>TC: Return result
+        
+        TC-->>User: 201 Created (with ID)
+    end
+
+```
 ---
 
 ## Getting Started
