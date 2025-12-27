@@ -10,11 +10,12 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
 {
     private readonly IApplicationDbContext _context;
 
+    // 6. DI creates the handler and injects ITS dependencies
     public CreateTransactionCommandHandler(IApplicationDbContext context)
     {
         _context = context;
     }
-
+    
     public async Task<int> Handle(CreateTransactionCommand request, CancellationToken cancellationToken)
     {
         var transaction = Transaction.Create(request.Name, request.Amount, request.CategoryId);
