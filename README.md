@@ -126,7 +126,7 @@ sequenceDiagram
     ```bash
     dotnet run --project src/WebApi
     ```
-4.  **Swagger UI**: Open `http://localhost:8080/swagger`
+4.  **Swagger UI**: Open `http://localhost:5130/swagger`
 
 ---
 
