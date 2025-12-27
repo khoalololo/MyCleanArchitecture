@@ -151,6 +151,8 @@ Clean Architecture uses **Vertical Slices**. To add a new feature:
 -   **Global Exception Handling**: Converts exceptions into clean API responses (Problem Details).
 -   **Rich Domain Model**: Logic stays inside Entities, not just "Anemic" DTOs.
 -   **Infrastructure Agnostic**: The business layer doesn't know EF Core exists.
+-   **Docker Healthchecks**: WebApi waits for the database to be fully healthy before starting.
+-   **Auto-Migrations**: Database schema is updated automatically on application startup.
 
 ---
 
