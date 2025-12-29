@@ -8,7 +8,8 @@ namespace Application.Common.Interfaces;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(string userId, string userName);
+    string GenerateToken(string userId, string userName, string role);
+    string GenerateRefreshToken();
 }
 
 public class JwtTokenGenerator : IJwtTokenGenerator
@@ -20,7 +21,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         _configuration = configuration;
     }
 
-    public string GenerateToken(string userId, string userName)
+    public string GenerateToken(string userId, string userName, string role)
     {
         var jwtSettings = _configuration.GetSection("JwtSettings");
         var secret = jwtSettings["Secret"];
@@ -36,6 +37,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId),
             new Claim(JwtRegisteredClaimNames.UniqueName, userName),
+            new Claim(ClaimTypes.Role, role),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
@@ -48,5 +50,13 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public string GenerateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
+        rng.GetBytes(randomNumber);
+        return Convert.ToBase64String(randomNumber);
     }
 }

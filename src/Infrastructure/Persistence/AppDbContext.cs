@@ -12,9 +12,11 @@ namespace Infrastructure.Persistence
 
         public DbSet<Category> Categories { get; set; }
         public DbSet<Transaction> Transactions { get; set; }
+        public DbSet<User> Users { get; set; }
 
-        IQueryable<Category> IApplicationDbContext.Categories => Categories.AsNoTracking();
-        IQueryable<Transaction> IApplicationDbContext.Transactions => Transactions.AsNoTracking();
+        IQueryable<Category> IApplicationDbContext.Categories => Categories;
+        IQueryable<Transaction> IApplicationDbContext.Transactions => Transactions;
+        IQueryable<User> IApplicationDbContext.Users => Users;
 
         public void Add<TEntity>(TEntity entity) where TEntity : class
         {
@@ -33,6 +35,23 @@ namespace Infrastructure.Persistence
             modelBuilder.Entity<Category>().HasData(
                 new Category { Id = 1, Name = "Food" },
                 new Category { Id = 2, Name = "Rent" }
+            );
+
+            modelBuilder.Entity<User>().HasData(
+                new User 
+                { 
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000001"), 
+                    Username = "admin", 
+                    PasswordHash = "password", // In real apps, hash this!
+                    Role = "Admin"
+                },
+                new User 
+                { 
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000002"), 
+                    Username = "user", 
+                    PasswordHash = "password", 
+                    Role = "User"
+                }
             );
         }
     }

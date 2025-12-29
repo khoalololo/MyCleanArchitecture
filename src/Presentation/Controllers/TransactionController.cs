@@ -19,6 +19,7 @@ public class TransactionController : ControllerBase
         _mediator = mediator;
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost]
     public async Task<IActionResult> Create(CreateTransactionCommand command)
     {
