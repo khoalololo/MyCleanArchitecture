@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Common.Interfaces;
+using Application.Interfaces;
 using FluentValidation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,6 +18,8 @@ public static class DependencyInjection
         });
         
         services.AddValidatorsFromAssembly(assembly);
+
+        services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
         return services;
     }
