@@ -144,15 +144,49 @@ Clean Architecture uses **Vertical Slices**. To add a new feature:
 
 ---
 
+## Authentication & Authorization
+
+This project implements **JWT Authentication** with **Refresh Tokens**.
+
+### 1. Login (Obtain Tokens)
+- **Endpoint**: `POST /api/auth/login`
+- **Body**: `{ "username": "admin", "password": "password" }`
+- **Response**: Returns `accessToken` (short-lived) and `refreshToken` (long-lived).
+
+### 2. Refresh Token Flow
+- **Endpoint**: `POST /api/auth/refresh`
+- **Body**: `{ "refreshToken": "..." }`
+- **Response**: Validates the old refresh token and returns a **new** pair of tokens.
+
+### 3. Authorization
+- Use `[Authorize]` on controllers or actions.
+- Use `[Authorize(Roles = "Admin")]` for role-based access control.
+
+---
+
 ## Core Features implemented
 
 -   **CQRS with MediatR**: Separation of Reads and Writes.
+-   **JWT & Refresh Tokens**: Secure authentication flow with token rotation.
 -   **Validation Pipeline**: Automated request validation before hitting the database.
 -   **Global Exception Handling**: Converts exceptions into clean API responses (Problem Details).
 -   **Rich Domain Model**: Logic stays inside Entities, not just "Anemic" DTOs.
 -   **Infrastructure Agnostic**: The business layer doesn't know EF Core exists.
 -   **Docker Healthchecks**: WebApi waits for the database to be fully healthy before starting.
 -   **Auto-Migrations**: Database schema is updated automatically on application startup.
+
+---
+
+## Lessons Learned & Best Practices
+
+### EF Core Change Tracking
+When using an interface for your `DbContext` (like `IApplicationDbContext`), ensure you don't use `.AsNoTracking()` by default if you intend to update entities.
+- **Problem**: We initially used `.AsNoTracking()` in `AppDbContext` for `IApplicationDbContext` properties, which caused `user.RefreshToken = newRefreshToken` to be ignored by `SaveChangesAsync()`.
+- **Solution**: Removed `.AsNoTracking()` to allow the Change Tracker to detect modifications.
+
+### Security
+- **Password Hashing**: In this demo, passwords are plain text for simplicity. **Always hash passwords** in production (e.g., using BCrypt or Argon2).
+- **Token Storage**: Store Refresh Tokens in the database and validate them against the user.
 
 ---
 
@@ -164,6 +198,7 @@ Clean Architecture uses **Vertical Slices**. To add a new feature:
 | **Migrations not applying** | Run `dotnet ef database update --project src/Infrastructure --startup-project src/WebApi`. |
 | **400 Bad Request on Post** | This is the **Validation Shield** at work. Check the response body for specific field errors. |
 | **Changes not reflecting** | Run `dotnet build` to ensure all layers are recompiled. |
+| **Refresh Token not updating** | Ensure Change Tracking is enabled in your `DbContext` for the entity being updated. |
 
 ---
 
